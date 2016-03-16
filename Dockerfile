@@ -3,7 +3,8 @@ FROM alpine:3.3
 ENV GOSU_VERSION="1.7" \
 	GOSU_DOWNLOAD_URL="https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64" \
 	GOSU_DOWNLOAD_SIG="https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64.asc" \
-	GOSU_DOWNLOAD_KEY="0x036A9C25BF357DD4"
+	GOSU_DOWNLOAD_KEY="0x036A9C25BF357DD4" \
+	NODE_ENV=production
 
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64 /usr/local/bin/dumb-init
 # Download and install gosu
@@ -39,8 +40,9 @@ RUN buildDeps='curl gnupg' HOME='/root' \
 
 WORKDIR /home/app/src
 
+ONBUILD ADD ./build/package.json package.json
+ONBUILD RUN npm install --production
 ONBUILD ADD ./build .
-ONBUILD ADD ./node_modules node_modules
 
 CMD ["dumb-init", "gosu", "app", "npm", "start"]
 
