@@ -1,49 +1,25 @@
-FROM frolvlad/alpine-glibc:alpine-3.3
+FROM node:4.4.0-slim
 
-ENV LANG="C.UTF-8" \
-	GOSU_VERSION="1.7" \
-	GOSU_DOWNLOAD_URL="https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64" \
-	GOSU_DOWNLOAD_SIG="https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64.asc" \
-	GOSU_DOWNLOAD_KEY="0x036A9C25BF357DD4" \
-	VERSION="v4.4.0" \
-	NPM_VERSION="2" \
-	NODE_ENV="production" \
-	CONFIG_FLAGS="--fully-static" \
-	DEL_PKGS="libgcc libstdc++" \
-	RM_DIRS="/usr/include"
-
-ADD https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64 /usr/local/bin/dumb-init
-
-# Download and install gosu
-#   https://github.com/tianon/gosu/releases
-RUN buildDeps='curl gnupg' HOME='/root' && \
-	set -x && \
-	apk add --update $buildDeps && \
-	gpg-agent --daemon && \
-	gpg --keyserver pgp.mit.edu --recv-keys $GOSU_DOWNLOAD_KEY && \
-	echo "trusted-key $GOSU_DOWNLOAD_KEY" >> /root/.gnupg/gpg.conf && \
-	curl -sSL "$GOSU_DOWNLOAD_URL" > gosu-amd64 && \
-	curl -sSL "$GOSU_DOWNLOAD_SIG" > gosu-amd64.asc && \
-	gpg --verify gosu-amd64.asc && \
-	rm -f gosu-amd64.asc && \
-	mv gosu-amd64 /usr/bin/gosu && \
-	chmod +x /usr/bin/gosu && \
-	apk del --purge $buildDeps && \
-	rm -rf /root/.gnupg && \
-	rm -rf /var/cache/apk/* && \
-
-  # give dumb-init run permission
-  chmod +x /usr/local/bin/dumb-init && \
-
-  # install node
-	apk add --no-cache --update 'nodejs>4.3.0' && \
-
-  # add app group and user
-  addgroup -S app && \
-  adduser -S -G app app && \
-  mkdir /home/app/src && \
-  chown -R app:app /home/app/src \
-	;
+ENV GOSU_VERSION 1.7
+RUN set -x \
+		# Get DumbInit
+		&& wget -O /usr/local/bin/dumb-init "https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64" \
+		&& chmod +x /usr/local/bin/dumb-init \
+		# Get Gosu
+		&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+		&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+		&& export GNUPGHOME="$(mktemp -d)" \
+		&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+		&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+		&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+		&& chmod +x /usr/local/bin/gosu \
+		&& gosu nobody true \
+		# add app group and user
+	  && addgroup --system app \
+	  && adduser --system --ingroup app app \
+	  && mkdir /home/app/src \
+	  && chown -R app:app /home/app/src \
+		;
 
 WORKDIR /home/app/src
 
