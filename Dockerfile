@@ -20,11 +20,11 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/andyshinn/alpine-pkg-glibc/release
   ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-  apk add --nocache --virtual=build-dependencies wget ca-certificates && \
+  apk add --no-cache --virtual=build-dependencies wget ca-certificates && \
   wget "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
 				"$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
 				"$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-  apk add --nocache --allow-untrusted \
+  apk add --no-cache --allow-untrusted \
       "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
       "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
       "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
@@ -34,31 +34,31 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/andyshinn/alpine-pkg-glibc/release
   apk del build-dependencies && \
   rm "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
      "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-     "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" \
+     "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
 
 	# Download and install gosu
 	#   https://github.com/tianon/gosu/releases
-	&& buildDeps='curl gnupg' HOME='/root' \
-	&& set -x \
-	&& apk add --update $buildDeps \
-	&& gpg-agent --daemon \
-	&& gpg --keyserver pgp.mit.edu --recv-keys $GOSU_DOWNLOAD_KEY \
-	&& echo "trusted-key $GOSU_DOWNLOAD_KEY" >> /root/.gnupg/gpg.conf \
-	&& curl -sSL "$GOSU_DOWNLOAD_URL" > gosu-amd64 \
-	&& curl -sSL "$GOSU_DOWNLOAD_SIG" > gosu-amd64.asc \
-	&& gpg --verify gosu-amd64.asc \
-	&& rm -f gosu-amd64.asc \
-	&& mv gosu-amd64 /usr/bin/gosu \
-	&& chmod +x /usr/bin/gosu \
-	&& apk del --purge $buildDeps \
-	&& rm -rf /root/.gnupg \
-	&& rm -rf /var/cache/apk/* \
+	buildDeps='curl gnupg' HOME='/root' && \
+	set -x && \
+	apk add --update $buildDeps && \
+	gpg-agent --daemon && \
+	gpg --keyserver pgp.mit.edu --recv-keys $GOSU_DOWNLOAD_KEY && \
+	echo "trusted-key $GOSU_DOWNLOAD_KEY" >> /root/.gnupg/gpg.conf && \
+	curl -sSL "$GOSU_DOWNLOAD_URL" > gosu-amd64 && \
+	curl -sSL "$GOSU_DOWNLOAD_SIG" > gosu-amd64.asc && \
+	gpg --verify gosu-amd64.asc && \
+	rm -f gosu-amd64.asc && \
+	mv gosu-amd64 /usr/bin/gosu && \
+	chmod +x /usr/bin/gosu && \
+	apk del --purge $buildDeps && \
+	rm -rf /root/.gnupg && \
+	rm -rf /var/cache/apk/* && \
 
   # give dumb-init run permission
-  && chmod +x /usr/local/bin/dumb-init \
+  chmod +x /usr/local/bin/dumb-init && \
 
   # install node
-	apk add --nocache curl make gcc g++ binutils-gold python linux-headers paxctl libgcc libstdc++ gnupg && \
+	apk add --no-cache curl make gcc g++ binutils-gold python linux-headers paxctl libgcc libstdc++ gnupg && \
   gpg --keyserver pool.sks-keyservers.net --recv-keys 9554F04D7259F04124DE6B476D5A82AC7E37093B && \
   gpg --keyserver pool.sks-keyservers.net --recv-keys 94AE36675C464D64BAFA68DD7434390BDBE9B9C5 && \
   gpg --keyserver pool.sks-keyservers.net --recv-keys 0034A06D9D9B0064CE8ADF6BF1747F4AD2306D93 && \
@@ -85,13 +85,13 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/andyshinn/alpine-pkg-glibc/release
   apk del curl make gcc g++ binutils-gold python linux-headers paxctl gnupg ${DEL_PKGS} && \
   rm -rf /etc/ssl /node-${VERSION}.tar.gz /SHASUMS256.txt.asc /node-${VERSION} ${RM_DIRS} \
     /usr/share/man /tmp/* /var/cache/apk/* /root/.npm /root/.node-gyp /root/.gnupg \
-    /usr/lib/node_modules/npm/man /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html \
+    /usr/lib/node_modules/npm/man /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html && \
 
   # add app group and user
-  && addgroup -S app \
-  && adduser -S -G app app \
-  && mkdir /home/app/src \
-  && chown -R app:app /home/app/src \
+  addgroup -S app && \
+  adduser -S -G app app && \
+  mkdir /home/app/src && \
+  chown -R app:app /home/app/src \
 	;
 
 WORKDIR /home/app/src
