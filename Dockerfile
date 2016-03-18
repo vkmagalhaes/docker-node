@@ -23,9 +23,8 @@ RUN set -x \
 
 WORKDIR /home/app/src
 
-ONBUILD ADD package.json package.json
-ONBUILD RUN npm install
 ONBUILD ADD . .
+ONBUILD RUN npm install
 
 CMD ["dumb-init", "gosu", "app", "npm", "start"]
 
