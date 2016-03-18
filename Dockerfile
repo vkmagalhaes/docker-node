@@ -1,6 +1,6 @@
-FROM node:4.4.0-slim
+FROM node:4.4.0
 
-ENV GOSU_VERSION 1.7
+ENV GOSU_VERSION=1.7
 RUN set -x \
 		# Get DumbInit
 		&& wget -O /usr/local/bin/dumb-init "https://github.com/Yelp/dumb-init/releases/download/v1.0.0/dumb-init_1.0.0_amd64" \
@@ -23,10 +23,10 @@ RUN set -x \
 
 WORKDIR /home/app/src
 
-ONBUILD ADD ./build/package.json package.json
-ONBUILD RUN npm install --production
-ONBUILD ADD ./build .
+ONBUILD ADD package.json package.json
+ONBUILD RUN npm install
+ONBUILD ADD . .
 
 CMD ["dumb-init", "gosu", "app", "npm", "start"]
 
-EXPOSE 3000
+EXPOSE 5000
